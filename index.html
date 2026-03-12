@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DEPO SHOWROOM</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #050505; color: #f8f9fa; font-family: sans-serif; margin: 0; padding: 0; }
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .logo { font-size: 26px; font-weight: 900; letter-spacing: 4px; }
+        .card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 15px; padding: 12px; margin-bottom: 20px; }
+        .img-box { width: 100%; height: 280px; background: #1a1a1a; border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .title { font-size: 18px; font-weight: 700; margin: 12px 0 5px 0; }
+        .desc { font-size: 12px; color: #666; margin-bottom: 10px; }
+        .size-row { display: flex; gap: 8px; margin: 10px 0; }
+        .size-btn { background: #111; border: 1px solid #222; color: #666; padding: 7px 14px; border-radius: 6px; cursor: pointer; }
+        .size-btn.active { background: #fff; color: #000; border-color: #fff; }
+        .price { font-size: 20px; font-weight: 800; margin-bottom: 15px; }
+        .btn-buy { background: #1a1a1a; color: #444; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: 700; cursor: not-allowed; text-transform: uppercase; }
+        .btn-buy.active { background: #fff; color: #000; cursor: pointer; }
+        .hidden { display: none; }
+        .input-item { width: 100%; background: #111; border: 1px solid #222; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div id="catalog" class="container">
+        <div class="header">
+            <div class="logo">DEPO</div>
+            <div style="font-size: 10px; color: #333;">NVSB // LIVE CLOUD</div>
+        </div>
+        <div id="loading" style="text-align:center; padding: 50px; color: #444;">ЗАГРУЗКА СКЛАДА...</div>
+        <div id="list"></div>
+    </div>
+
+    <div id="checkout" class="container hidden">
+        <h2 style="letter-spacing: 1px;">ОФОРМЛЕНИЕ</h2>
+        <div id="summary" style="margin-bottom: 20px; font-size: 14px; color: #888; background: #111; padding: 15px; border-radius: 10px;"></div>
+        <input type="text" id="uName" class="input-item" placeholder="Ваше Имя">
+        <input type="tel" id="uPhone" class="input-item" placeholder="Телефон">
+    </div>
+
+    <script>
+        var tg = window.Telegram.WebApp;
+        
+        // --- СЮДА ВСТАВЬ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT ---
+        var API_URL = 'https://script.google.com/macros/s/AKfycbzhDDpsajrKIwHuiXdeQswb6-h9XwM8PsWNNOI1BK4E8Xdwa7FUXHhCVpJiN62twXJ9/exec'; 
+        
+        var state = { cart: [], goods: [], isCheckout: false };
+
+        // Загрузка данных из таблицы
+        async function loadData() {
+            try {
+                var response = await fetch(API_URL);
+                state.goods = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                render();
+            } catch (e) {
+                document.getElementById('loading').innerHTML = 'ОШИБКА ПОДКЛЮЧЕНИЯ К ТАБЛИЦЕ';
+                console.error(e);
+            }
+        }
+
+        function render() {
+            var html = '';
+            for (var i = 0; i < state.goods.length; i++) {
+                var g = state.goods[i];
+                html += '<div class="card">' +
+                    '<div class="img-box"><img src="' + g.img + '" onerror="this.style.opacity=\'0\'"></div>' +
+'<div class="title">' + g.name + '</div>' +
+                    '<div class="desc">' + g.desc + '</div>' +
+                    '<div class="size-row">' + renderSizes(g) + '</div>' +
+                    '<div class="price">' + g.price + ' ₽</div>' +
+                    '<button class="btn-buy" id="b-' + g.id + '" disabled onclick="add(' + g.id + ')">ВЫБЕРИТЕ РАЗМЕР</button>' +
+                '</div>';
+            }
+            document.getElementById('list').innerHTML = html;
+        }
+
+        function renderSizes(g) {
+            var res = '';
+            for (var j = 0; j < g.sizes.length; j++) {
+                res += '<button class="size-btn" onclick="sel(this,' + g.id + ',\'' + g.sizes[j].trim() + '\')">' + g.sizes[j] + '</button>';
+            }
+            return res;
+        }
+
+        function sel(btn, id, sz) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            var btns = btn.parentNode.getElementsByClassName('size-btn');
+            for(var k=0; k<btns.length; k++) btns[k].classList.remove('active');
+            btn.classList.add('active');
+            var b = document.getElementById('b-'+id);
+            b.disabled = false;
+            b.classList.add('active');
+            b.innerText = 'В КОРЗИНУ (' + sz + ')';
+            b.setAttribute('data-sz', sz);
+        }
+
+        function add(id) {
+            var p = state.goods.find(function(x){return x.id === id});
+            var s = document.getElementById('b-'+id).getAttribute('data-sz');
+            state.cart.push({ n: p.name, p: p.price, s: s });
+            
+            var total = 0;
+            for(var i=0; i<state.cart.length; i++) total += state.cart[i].p;
+            
+            tg.MainButton.setText('ОФОРМИТЬ ЗАКАЗ (' + total + ' ₽)');
+            tg.MainButton.show();
+        }
+
+        tg.MainButton.onClick(function() {
+            if (!state.isCheckout) {
+                state.isCheckout = true;
+                document.getElementById('catalog').classList.add('hidden');
+                document.getElementById('checkout').classList.remove('hidden');
+                var sum = '';
+                for(var i=0; i<state.cart.length; i++) sum += '• ' + state.cart[i].n + ' (' + state.cart[i].s + ')<br>';
+                document.getElementById('summary').innerHTML = sum;
+                tg.MainButton.setText('ОТПРАВИТЬ ЗАКАЗ МЕНЕДЖЕРУ');
+            } else {
+                sendOrder();
+            }
+        });
+
+        function sendOrder() {
+            var n = document.getElementById('uName').value;
+            var ph = document.getElementById('uPhone').value;
+            if(!n || !ph) { tg.showAlert('Заполните данные для связи!'); return; }
+            
+            tg.MainButton.showProgress();
+            // Тут можно добавить отправку обратно в Google Таблицу на лист "Заказы"
+            setTimeout(function() {
+                tg.showAlert('Заказ принят! Менеджер DEPO напишет вам.', function() { tg.close(); });
+            }, 1000);
+        }
+
+        loadData();
+        tg.expand();
+    </script>
+</body>
+</html>
