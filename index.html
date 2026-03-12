@@ -52,28 +52,37 @@
         var state = { cart: [], goods: [], isCheckout: false };
 
     async function loadData() {
+    const loadingNode = document.getElementById('loading');
     try {
-        var response = await fetch(API_URL);
-        var data = await response.json();
+        // Добавляем параметр redirect: 'follow', чтобы пройти через защиту Google
+        const response = await fetch(API_URL, {
+            method: 'GET',
+            redirect: 'follow' 
+        });
+
+        // Проверяем, что ответ вообще пришёл
+        if (!response.ok) throw new Error('Сеть не ответит');
+
+        const data = await response.json();
         
-        // Чистим логику: проверяем, где лежат наши товары
+        // Проверяем, массив это или объект с полем result
         if (Array.isArray(data)) {
             state.goods = data;
-        } else if (data.result && Array.isArray(data.result)) {
+        } else if (data && data.result) {
             state.goods = data.result;
         } else {
             state.goods = [];
         }
-        
+
         if (state.goods.length === 0) {
-            document.getElementById('loading').innerHTML = 'В ТАБЛИЦЕ НЕТ ТОВАРОВ';
+            loadingNode.innerHTML = 'В ТАБЛИЦЕ НЕТ ДАННЫХ (ПРОВЕРЬТЕ СТРОКИ)';
         } else {
-            document.getElementById('loading').style.display = 'none';
+            loadingNode.style.display = 'none';
             render();
         }
     } catch (e) {
-        document.getElementById('loading').innerHTML = 'ОШИБКА ПОДКЛЮЧЕНИЯ К ТАБЛИЦЕ';
-        console.error("Ошибка:", e);
+        console.error("Критическая ошибка:", e);
+        loadingNode.innerHTML = 'ОШИБКА ДАННЫХ: Проверьте "Доступ для всех" в Apps Script';
     }
 }
 
