@@ -51,18 +51,31 @@
         
         var state = { cart: [], goods: [], isCheckout: false };
 
-        // Загрузка данных из таблицы
-        async function loadData() {
-            try {
-                var response = await fetch(API_URL);
-                state.goods = await response.json();
-                document.getElementById('loading').style.display = 'none';
-                render();
-            } catch (e) {
-                document.getElementById('loading').innerHTML = 'ОШИБКА ПОДКЛЮЧЕНИЯ К ТАБЛИЦЕ';
-                console.error(e);
-            }
+    async function loadData() {
+    try {
+        var response = await fetch(API_URL);
+        var data = await response.json();
+        
+        // Чистим логику: проверяем, где лежат наши товары
+        if (Array.isArray(data)) {
+            state.goods = data;
+        } else if (data.result && Array.isArray(data.result)) {
+            state.goods = data.result;
+        } else {
+            state.goods = [];
         }
+        
+        if (state.goods.length === 0) {
+            document.getElementById('loading').innerHTML = 'В ТАБЛИЦЕ НЕТ ТОВАРОВ';
+        } else {
+            document.getElementById('loading').style.display = 'none';
+            render();
+        }
+    } catch (e) {
+        document.getElementById('loading').innerHTML = 'ОШИБКА ПОДКЛЮЧЕНИЯ К ТАБЛИЦЕ';
+        console.error("Ошибка:", e);
+    }
+}
 
         function render() {
             var html = '';
