@@ -148,10 +148,39 @@
             }
         });
 
-        function sendOrder() {
-            var n = document.getElementById('uName').value;
-            var ph = document.getElementById('uPhone').value;
-            if(!n || !ph) { tg.showAlert('Заполните данные для связи!'); return; }
+        async function sendOrder() {
+    var n = document.getElementById('uName').value;
+    var ph = document.getElementById('uPhone').value;
+    if(!n || !ph) { tg.showAlert('Заполните данные!'); return; }
+    
+    tg.MainButton.showProgress();
+
+    var total = state.cart.reduce((sum, item) => sum + item.p, 0);
+    var orderText = state.cart.map(i => i.n + " (" + i.s + ")").join(", ");
+
+    var data = {
+        name: n,
+        phone: ph,
+        order: orderText,
+        total: total
+    };
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Важно для Google Script
+            body: JSON.stringify(data)
+        });
+        
+        tg.showAlert('Заказ отправлен в таблицу! Менеджер свяжется с вами.', function() {
+            tg.close();
+        });
+    } catch (e) {
+        tg.showAlert('Ошибка при отправке. Попробуйте еще раз.');
+        tg.MainButton.hideProgress();
+    }
+}
+
             
             tg.MainButton.showProgress();
             // Тут можно добавить отправку обратно в Google Таблицу на лист "Заказы"
