@@ -240,24 +240,68 @@
         };
 
         // Загрузка данных
-        async function loadProducts() {
-            const loadingEl = document.getElementById('loading');
-            try {
-                const res = await fetch(API_URL);                if (!res.ok) throw new Error('Сеть не ответила');
-                const data = await res.json();
-                state.products = Array.isArray(data) ? data : [];
+async function loadProducts() {
+    const loadingEl = document.getElementById('loading');
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Сеть не ответила');
+        const data = await res.json();
 
-                if (state.products.length === 0) {
-                    loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
-                } else {
-                    loadingEl.classList.add('hidden');
-                    renderProducts();
-                }
-            } catch (err) {
-                loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
-                console.error('Ошибка загрузки:', err);
-            }
+        // Разделяем товары и категории
+        state.products = Array.isArray(data) ? data : data.products || [];
+        const categories = data.categories || [];
+
+        // Генерируем фильтры
+        renderFilters(categories);
+
+        if (state.products.length === 0) {
+            loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
+        } else {
+            loadingEl.classList.add('hidden');
+            renderProducts();
         }
+    } catch (err) {
+        loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
+        console.error('Ошибка загрузки:', err);
+    }
+}
+
+// Генерация фильтров
+function renderFilters(categories) {
+    const filtersContainer = document.querySelector('.filters-sticky > div:first-child');
+    filtersContainer.innerHTML = '';
+
+    // Добавляем "Все"
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-btn active';
+    allBtn.dataset.category = 'all';
+    allBtn.textContent = 'Все';
+    allBtn.onclick = () => setCategoryFilter('all');
+    filtersContainer.appendChild(allBtn);
+
+    // Добавляем динамические категории
+    categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.category = cat;
+        btn.textContent = capitalize(cat);
+        btn.onclick = () => setCategoryFilter(cat);
+        filtersContainer.appendChild(btn);
+    });
+}
+
+// Установка категории
+function setCategoryFilter(category) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    state.selectedCategory = category;
+    renderProducts();
+}
+
+// Функция для заглавной буквы
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
         // Отрисовка товаров
         function renderProducts() {
