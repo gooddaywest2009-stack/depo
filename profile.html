@@ -1,0 +1,557 @@
+
+# 2. Страница ПРОФИЛЯ (profile.html)
+profile_html = '''<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль | RankNet</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --accent-gold: #ffd700;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #8b5cf6;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-color: #2a2a3a;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Навигация */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.7rem;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Шапка профиля */
+        .profile-header {
+            background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--bg-primary);
+            margin: 0 auto 1rem;
+            border: 4px solid var(--bg-secondary);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-handle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-gold);
+            padding: 0.4rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Рейтинг карточка */
+        .rating-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin: 1rem;
+            text-align: center;
+        }
+
+        .rating-value-large {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .rating-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .rating-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .rating-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .rating-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            margin-top: 0.5rem;
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Формула */
+        .formula-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .formula-box {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            overflow-x: auto;
+            border-left: 3px solid var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+
+        .formula-legend {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .formula-legend span {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* История активности */
+        .activity-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin: 1rem;
+            margin-bottom: 100px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .activity-value {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .activity-value.negative {
+            color: var(--danger);
+        }
+
+        /* Настройки */
+        .settings-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        /* Уровни */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .level-item {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 0.75rem;
+            text-align: center;
+            opacity: 0.5;
+        }
+
+        .level-item.unlocked {
+            opacity: 1;
+            border: 1px solid var(--accent-gold);
+        }
+
+        .level-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .level-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .level-range {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-btn" onclick="editProfile()">⚙️</button>
+
+    <header class="profile-header">
+        <div class="profile-avatar-large" id="profileAvatar">А</div>
+        <div class="profile-name" id="profileName">Аноним</div>
+        <div class="profile-handle" id="profileHandle">@anonymous</div>
+        <div class="verified-badge" id="verifiedBadge" style="display: none;">
+            ✓ Верифицирован
+        </div>
+    </header>
+
+    <main>
+        <div class="rating-card">
+            <div class="rating-value-large" id="ratingValue">2.500</div>
+            <div class="rating-label">SRC Рейтинг</div>
+            <div class="rating-bar">
+                <div class="rating-progress" id="ratingProgress" style="width: 50%"></div>
+            </div>
+            <div class="rating-status" id="ratingStatus">👤 Участник</div>
+            
+            <div class="levels-grid">
+                <div class="level-item" id="level1">
+                    <div class="level-icon">🆕</div>
+                    <div class="level-name">Новичок</div>
+                    <div class="level-range">0.0 - 2.5</div>
+                </div>
+                <div class="level-item" id="level2">
+                    <div class="level-icon">👤</div>
+                    <div class="level-name">Участник</div>
+                    <div class="level-range">2.5 - 3.5</div>
+                </div>
+                <div class="level-item" id="level3">
+                    <div class="level-icon">💎</div>
+                    <div class="level-name">Эксперт</div>
+                    <div class="level-range">3.5 - 4.5</div>
+                </div>
+                <div class="level-item" id="level4">
+                    <div class="level-icon">🏆</div>
+                    <div class="level-name">Элита</div>
+                    <div class="level-range">4.5 - 5.0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="statPosts">0</div>
+                <div class="stat-label">Постов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statVotes">0</div>
+                <div class="stat-label">Голосов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statRep">0</div>
+                <div class="stat-label">Репутация</div>
+            </div>
+        </div>
+
+        <div class="formula-section">
+            <h2 class="section-title">🧮 Формула SRC</h2>
+            <div class="formula-box">
+                Rₙₑᵥ = Rₒₗd + (Sₜₒₜₐₗ × Wᵤₛₑᵣ × Kᵈᵉᶜᵃʸ)/(1 + (Rₒₗd/5)²) - Pₚₑₙₐₗₜᵧ
+            </div>
+            <div class="formula-legend">
+                <span>S</span> — сумма действий (посты, лайки)<br>
+                <span>W</span> — вес голосующего (0.5x - 2.0x)<br>
+                <span>K</span> — коэффициент затухания<br>
+                <span>P</span> — штрафы за нарушения<br>
+                <span>Знаменатель</span> — защита от накруток
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <h2 class="section-title">📈 История рейтинга</h2>
+            <div id="activityList">
+                <div class="activity-item">
+                    <div class="activity-icon">🆕</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Регистрация в RankNet</div>
+                        <div class="activity-time">Начальный рейтинг</div>
+                    </div>
+                    <div class="activity-value">+2.500</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Лента</span>
+        </a>
+        <a href="messages.html" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>Чаты</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span>Профиль</span>
+        </a>
+    </nav>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('ranknet_user')) || {
+            name: 'Аноним',
+            handle: '@anonymous',
+            rating: 2.500,
+            avatar: 'А',
+            posts: 0,
+            votes: 0,
+            history: []
+        };
+
+        function getRatingTitle(rating) {
+            if (rating >= 4.8) return '⭐ Легенда';
+            if (rating >= 4.5) return '🏆 Элита';
+            if (rating >= 3.5) return '💎 Эксперт';
+            if (rating >= 2.5) return '👤 Участник';
+            return '🆕 Новичок';
+        }
+
+        function updateProfile() {
+            document.getElementById('profileAvatar').textContent = currentUser.avatar;
+            document.getElementById('profileName').textContent = currentUser.name;
+            document.getElementById('profileHandle').textContent = currentUser.handle;
+            document.getElementById('ratingValue').textContent = currentUser.rating.toFixed(3);
+            document.getElementById('ratingStatus').textContent = getRatingTitle(currentUser.rating);
+            document.getElementById('statPosts').textContent = currentUser.posts;
+            document.getElementById('statVotes').textContent = currentUser.votes;
+            document.getElementById('statRep').textContent = Math.floor(currentUser.rating * 200);
+            
+            // Прогресс бар
+            const progress = (currentUser.rating / 5) * 100;
+            document.getElementById('ratingProgress').style.width = progress + '%';
+            
+            // Верификация
+            if (currentUser.rating > 4.0) {
+                document.getElementById('verifiedBadge').style.display = 'inline-flex';
+            }
+            
+            // Уровни
+            const rating = currentUser.rating;
+            document.getElementById('level1').className = 'level-item' + (rating < 2.5 ? ' unlocked' : '');
+            document.getElementById('level2').className = 'level-item' + (rating >= 2.5 && rating < 3.5 ? ' unlocked' : '');
+            document.getElementById('level3').className = 'level-item' + (rating >= 3.5 && rating < 4.5 ? ' unlocked' : '');
+            document.getElementById('level4').className = 'level-item' + (rating >= 4.5 ? ' unlocked' : '');
+            
+            // История
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('activityList');
+            const history = currentUser.history || [];
+            
+            if (history.length === 0) {
+                list.innerHTML = `
+                    <div class="activity-item">
+                        <div class="activity-icon">🆕</div>
+                        <div class="activity-content">
+                            <div class="activity-title">Регистрация в RankNet</div>
+                            <div class="activity-time">Начальный рейтинг</div>
+                        </div>
+                        <div class="activity-value">+2.500</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            list.innerHTML = history.slice().reverse().map(item => `
+                <div class="activity-item">
+                    <div class="activity-icon">${item.icon}</div>
+                    <div class="activity-content">
+                        <div class="activity-title">${item.title}</div>
+                        <div class="activity-time">${item.time}</div>
+                    </div>
+                    <div class="activity-value ${item.value < 0 ? 'negative' : ''}">${item.value > 0 ? '+' : ''}${item.value.toFixed(3)}</div>
+                </div>
+            `).join('');
+        }
+
+        function editProfile() {
+            const newName = prompt('Введите имя:', currentUser.name);
+            if (newName && newName.trim()) {
+                currentUser.name = newName.trim();
+                currentUser.avatar = newName.trim()[0].toUpperCase();
+                currentUser.handle = '@' + newName.trim().toLowerCase().replace(/\s/g, '_');
+                localStorage.setItem('ranknet_user', JSON.stringify(currentUser));
+                updateProfile();
+                alert('Профиль обновлён!');
+            }
+        }
+
+        // Инициализация
+        updateProfile();
+    </script>
+</body>
+</html>'''
+
+print("✅ Страница ПРОФИЛЯ создана")
+print(f"Размер: {len(profile_html)} символов")
