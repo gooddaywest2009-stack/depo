@@ -1,477 +1,587 @@
-<!DOCTYPE html>
+
+# Создаем структуру многостраничного сайта RankNet
+
+# 1. Главная страница - ЛЕНТА (index.html)
+feed_html = '''<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DEPO SHOWROOM</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента | RankNet</title>
     <style>
-        /* Подключение Tailwind через CDN */
-        @import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --accent-gold: #ffd700;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #8b5cf6;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --border-color: #2a2a3a;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: #050505;
-            color: #f8f9fa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
         }
 
-        /* Glassmorphism эффект */
-        .glass-card {
-            background: rgba(15, 15, 15, 0.4);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-        }
-
-        /* Неоновый акцент при активации */
-        .neon-active {
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            transition: box-shadow 0.3s ease;
-        }
-
-        /* Плавающая анимация карточки */
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* Карусель изображений */
-        .slider-container {
+        /* Навигация */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
             display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;            gap: 8px;
-            padding: 8px 0;
-            scrollbar-width: none;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            z-index: 1000;
         }
 
-        .slider-container::-webkit-scrollbar {
-            display: none;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.7rem;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
 
-        .slide {
-            scroll-snap-align: start;
-            min-width: 100%;
-            height: 280px;
+        .nav-item.active {
+            color: var(--accent-gold);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Шапка */
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Индикаторы слайдов */
-        .indicators {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 6px;
-            margin-top: 10px;
+            font-size: 1.25rem;
+            cursor: pointer;
         }
 
-        .indicator-dot {
-            width: 8px;
-            height: 8px;
+        /* Контент */
+        .content {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 100px;
+        }
+
+        /* Создание поста */
+        .create-post {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .create-post-header {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background-color: #333;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-primary);
+            flex-shrink: 0;
         }
 
-        .indicator-dot.active {
-            background-color: white;
+        .post-input {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            resize: none;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .post-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .post-tools {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: var(--bg-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Посты */
+        .post-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .post-author {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .author-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .author-rating {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .post-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .post-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.4rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .vote-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vote-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .vote-btn.active-up {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .vote-btn.active-down {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .vote-count {
+            font-weight: 700;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
         /* Фильтры */
-        .filters-sticky {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: rgba(5, 5, 5, 0.9);
-            padding: 12px;
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
         }
+
         .filter-btn {
-            background: transparent;
-            border: 1px solid #333;
-            color: #ccc;
-            padding: 8px 16px;
+            padding: 0.5rem 1rem;
             border-radius: 20px;
-            margin-right: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .filter-btn.active {
-            background: white;
-            color: black;
-        }
-
-        /* Кнопки размеров */
-        .size-btn {
-            background: #111;
-            border: 1px solid #222;
-            color: #666;
-            padding: 7px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .size-btn.active {
-            background: #fff;
-            color: #000;
-            border-color: #fff;
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-        }
-
-        /* Кнопка купить */
-        .btn-buy {
-            background: #1a1a1a;
-            color: #444;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            font-weight: 700;
-            cursor: not-allowed;
-        }
-
-        .btn-buy.active {
-            background: #fff;
-            color: #000;
-            cursor: pointer;
-        }
-        /* Скрытые блоки */
-        .hidden {
-            display: none;
-        }
-
-        /* Стили формы */
-        .input-item {
-            width: 100%;
-            background: #111;
-            border: 1px solid #222;
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-        }
-
-        /* Футер с локацией */
-        .location-footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .location-btn {
-            color: white;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+            border-color: var(--accent-gold);
         }
     </style>
 </head>
 <body>
+    <header class="header">
+        <div class="logo">⭐ RankNet</div>
+        <div class="header-actions">
+            <button class="icon-btn">🔔</button>
+            <button class="icon-btn">⚙️</button>
+        </div>
+    </header>
 
-    <!-- Экран каталога -->
-    <div id="catalog" class="container px-4 py-6 max-w-md mx-auto">
-        <!-- Логотип -->
-        <div class="flex justify-between items-center mb-6">
-            <div class="text-2xl font-black tracking-[4px]">DEPO</div>
-            <div class="text-xs text-gray-500">NVSB // LIVE CLOUD</div>
+    <main class="content">
+        <div class="filters">
+            <button class="filter-btn active">🔥 Популярное</button>
+            <button class="filter-btn">🆕 Новое</button>
+            <button class="filter-btn">⭐ По рейтингу</button>
+            <button class="filter-btn">👥 Подписки</button>
         </div>
 
-        <!-- Фильтры и поиск -->
-        <div class="filters-sticky mb-6">
-            <div class="flex overflow-x-auto pb-2 space-x-2">
-                <button class="filter-btn active" data-category="all">Все</button>
-                <button class="filter-btn" data-category="новинки">Новинки</button>                <button class="filter-btn" data-category="худи">Худи</button>
-                <button class="filter-btn" data-category="брюки">Брюки</button>
-                <button class="filter-btn" data-category="куртки">Куртки</button>
+        <div class="create-post">
+            <div class="create-post-header">
+                <div class="user-avatar" id="currentAvatar">А</div>
+                <textarea class="post-input" id="postInput" placeholder="Что нового? Поделитесь мыслями..."></textarea>
             </div>
-            <input type="text" id="search-input" class="input-item mt-2" placeholder="Поиск...">
+            <div class="post-tools">
+                <button class="tool-btn">📷</button>
+                <button class="tool-btn">🎥</button>
+                <button class="tool-btn">📊</button>
+                <button class="tool-btn">😊</button>
+            </div>
+            <button class="btn-primary" onclick="createPost()">🚀 Опубликовать</button>
         </div>
 
-        <!-- Состояние загрузки -->
-        <div id="loading" class="text-center py-16 text-gray-500">ЗАГРУЗКА СКЛАДА...</div>
+        <div id="postsContainer"></div>
+    </main>
 
-        <!-- Список товаров -->
-        <div id="product-list" class="space-y-6"></div>
-    </div>
-
-    <!-- Экран оформления -->
-    <div id="checkout" class="container px-4 py-6 max-w-md mx-auto hidden">
-        <h2 class="text-xl font-bold tracking-wide mb-4">ОФОРМЛЕНИЕ</h2>
-        <div id="order-summary" class="bg-gray-900 p-4 rounded-lg text-sm text-gray-400 mb-4"></div>
-        <input type="text" id="user-name" class="input-item" placeholder="Ваше имя">
-        <input type="tel" id="user-phone" class="input-item" placeholder="Телефон">
-        <div class="location-footer">
-            Новосибирск, ТЦ Москва (Крылова, 26)
-            <button class="location-btn" onclick="openMap()">Открыть карту</button>
-        </div>
-    </div>
+    <nav class="nav-bar">
+        <a href="index.html" class="nav-item active">
+            <span class="nav-icon">🏠</span>
+            <span>Лента</span>
+        </a>
+        <a href="messages.html" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span>Чаты</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Профиль</span>
+        </a>
+    </nav>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram?.WebApp || null;
-        if (tg) {
-            tg.expand();
-        }
-
-        // Конфигурация API
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzhDDpsajrKIwHuiXdeQswb6-h9XwM8PsWNNOI1BK4E8Xdwa7FUXHhCVpJiN62twXJ9/exec';
-
-        // Состояние приложения
-        let state = {
-            products: [],
-            cart: [],
-            selectedCategory: 'all',
-            searchQuery: '',
-            isCheckout: false
+        // Данные
+        let currentUser = JSON.parse(localStorage.getItem('ranknet_user')) || {
+            name: 'Аноним',
+            handle: '@anonymous',
+            rating: 2.500,
+            avatar: 'А',
+            posts: 0,
+            votes: 0
         };
 
-        // Загрузка данных
-async function loadProducts() {
-    const loadingEl = document.getElementById('loading');
-    try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Сеть не ответила');
-        const data = await res.json();
-
-        // Разделяем товары и категории
-        state.products = Array.isArray(data) ? data : data.products || [];
-        const categories = data.categories || [];
-
-        // Генерируем фильтры
-        renderFilters(categories);
-
-        if (state.products.length === 0) {
-            loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
-        } else {
-            loadingEl.classList.add('hidden');
-            renderProducts();
-        }
-    } catch (err) {
-        loadingEl.innerHTML = 'РЕЖИМ ОФЛАЙН: наличие уточняйте у менеджера';
-        console.error('Ошибка загрузки:', err);
-    }
-}
-
-// Генерация фильтров
-function renderFilters(categories) {
-    const filtersContainer = document.querySelector('.filters-sticky > div:first-child');
-    filtersContainer.innerHTML = '';
-
-    // Добавляем "Все"
-    const allBtn = document.createElement('button');
-    allBtn.className = 'filter-btn active';
-    allBtn.dataset.category = 'all';
-    allBtn.textContent = 'Все';
-    allBtn.onclick = () => setCategoryFilter('all');
-    filtersContainer.appendChild(allBtn);
-
-    // Добавляем динамические категории
-    categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'filter-btn';
-        btn.dataset.category = cat;
-        btn.textContent = capitalize(cat);
-        btn.onclick = () => setCategoryFilter(cat);
-        filtersContainer.appendChild(btn);
-    });
-}
-
-// Установка категории
-function setCategoryFilter(category) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    state.selectedCategory = category;
-    renderProducts();
-}
-
-// Функция для заглавной буквы
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-        // Отрисовка товаров
-        function renderProducts() {
-            const filtered = state {
-                const matchesCategory = state.selectedCategory === 'all' || p.category.toLowerCase().includes(state.selectedCategory);
-                const matchesSearch = p.name.toLowerCase().includes(state.searchQuery.toLowerCase());
-                return matchesCategory && matchesSearch;
-            });
-
-            const listEl = document.getElementById('product-list');
-            listEl.innerHTML = '';
-
-            filtered.forEach(product => {
-                const card = createProductCard(product);
-                listEl.appendChild(card);
-            });
-        }
-
-        // Создание карточки товара
-        function createProductCard(product) {
-            const card = document.createElement('div');
-            card.className = 'glass-card floating p-4';
-
-            const imageUrls = product.img.split(',').map(url => url.trim());
-            let slidesHtml = '';
-            imageUrls.forEach((url, idx) => {
-                slidesHtml += `<div class="slide"><img src="${escapeHtml(url)}" onerror="this.style.display='none'"/></div>`;
-            });
-
-            let indicatorsHtml = '';
-            imageUrls.forEach((_, idx) => {
-                indicatorsHtml += `<div class="indicator-dot ${idx === 0 ? 'active' : ''}"></div>`;
-            });
-
-            card.innerHTML = `                <div class="slider-container">${slidesHtml}</div>
-                <div class="indicators">${indicatorsHtml}</div>
-                <div class="title text-lg font-bold my-2">${escapeHtml(product.name)}</div>
-                <div class="desc text-xs text-gray-500 mb-2">${escapeHtml(product.desc)}</div>
-                <div class="size-row flex gap-2 my-3">
-                    ${(product.sizes || []).map(sz => `<button class="size-btn" onclick="selectSize(this, ${product.id}, '${escapeHtml(sz.trim())}')">${sz}</button>`).join('')}
-                </div>
-                <div class="price text-xl font-extrabold mb-3">${product.price} ₽</div>
-                <button id="buy-${product.id}" class="btn-buy" disabled onclick="addToCart(${product.id})">ВЫБЕРИТЕ РАЗМЕР</button>
-            `;
-
-            return card;
-        }
-
-        // Выбор размера
-        function selectSize(btn, id, size) {
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-            const parent = btn.parentElement;
-            parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const buyBtn = document.getElementById(`buy-${id}`);
-            buyBtn.disabled = false;
-            buyBtn.classList.add('active');
-            buyBtn.textContent = `В КОРЗИНУ (${size})`;
-            buyBtn.dataset.size = size;
-        }
-
-        // Добавление в корзину
-        function addToCart(id) {
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            const product = state.products.find(p => p.id == id);
-            const size = document.getElementById(`buy-${id}`).dataset.size;
-
-            state.cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                size: size
-            });
-
-            updateTotal();
-        }
-
-        // Обновление суммы
-        function updateTotal() {
-            const total = state.cart.reduce((sum, item) => sum + item.price, 0);
-            if (tg) {                tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ (${total} ₽)`);
-                tg.MainButton.show();
+        let posts = JSON.parse(localStorage.getItem('ranknet_posts')) || [
+            {
+                id: 1,
+                author: { name: 'Мария К.', avatar: 'М', rating: 4.850, verified: true },
+                content: 'Только что изучила формулу SRC! Затухание на высоких рейтингах — это гениально. С 4.8 до 4.9 сложнее, чем с 2.5 до 2.6 📊✨',
+                timestamp: Date.now() - 3600000,
+                score: 245,
+                votes: { up: 42, down: 3 },
+                userVote: null
+            },
+            {
+                id: 2,
+                author: { name: 'Алексей В.', avatar: 'А', rating: 4.920, verified: true },
+                content: 'Новый модуль защиты от накруток готов! Теперь система автоматически замораживает подозрительную активность. Безопасность превыше всего! 🛡️',
+                timestamp: Date.now() - 7200000,
+                score: 189,
+                votes: { up: 31, down: 1 },
+                userVote: null
+            },
+            {
+                id: 3,
+                author: { name: 'Елена С.', avatar: 'Е', rating: 3.450, verified: false },
+                content: 'Кто-нибудь понимает, как работает коэффициент W_user? При моём рейтинге 3.4 мой голос имеет вес около 1.0x 🤔',
+                timestamp: Date.now() - 10800000,
+                score: 67,
+                votes: { up: 12, down: 5 },
+                userVote: null
             }
+        ];
+
+        // Формула SRC
+        function calculateRatingChange(rating, actionValue, voterRating) {
+            const R_old = rating;
+            const S_total = actionValue;
+            const W_user = 0.5 + (voterRating / 5) * 1.5;
+            const K_decay = 1.0;
+            const denominator = 1 + Math.pow(R_old / 5, 2);
+            const change = (S_total * W_user * K_decay) / denominator;
+            
+            return {
+                change: change,
+                newRating: Math.min(4.999, Math.max(0, R_old + change))
+            };
         }
 
-        // Оформление заказа
-        tg?.MainButton.onClick(() => {
-            if (!state.isCheckout) {
-                state.isCheckout = true;
-                document.getElementById('catalog').classList.add('hidden');
-                document.getElementById('checkout').classList.remove('hidden');
+        function saveData() {
+            localStorage.setItem('ranknet_user', JSON.stringify(currentUser));
+            localStorage.setItem('ranknet_posts', JSON.stringify(posts));
+        }
 
-                const summary = state.cart.map(item => `• ${item.name} (${item.size})`).join('<br>');
-                document.getElementById('order-summary').innerHTML = summary;
-
-                tg.MainButton.setText('ОТПРАВИТЬ ЗАКАЗ МЕНЕДЖЕРУ');
-            } else {
-                sendOrder();
-            }
-        });
-
-        // Отправка заказа
-        async function sendOrder() {
-            const name = document.getElementById('user-name').value.trim();
-            const phone = document.getElementById('user-phone').value.trim();
-
-            if (!name || !phone) {
-                tg?.showAlert('Заполните все поля!');
-                tg?.HapticFeedback?.notificationOccurred('error');
+        function createPost() {
+            const input = document.getElementById('postInput');
+            const content = input.value.trim();
+            
+            if (!content) {
+                alert('Введите текст поста');
                 return;
             }
+            
+            const result = calculateRatingChange(currentUser.rating, 0.05, currentUser.rating);
+            currentUser.rating = result.newRating;
+            currentUser.posts++;
+            
+            const newPost = {
+                id: Date.now(),
+                author: { 
+                    name: currentUser.name, 
+                    avatar: currentUser.avatar, 
+                    rating: currentUser.rating,
+                    verified: currentUser.rating > 4.0
+                },
+                content: content,
+                timestamp: Date.now(),
+                score: Math.floor(currentUser.rating * 50),
+                votes: { up: 1, down: 0 },
+                userVote: 'up'
+            };
+            
+            posts.unshift(newPost);
+            saveData();
+            
+            input.value = '';
+            renderPosts();
+            alert(`Пост создан! Рейтинг +${result.change.toFixed(3)} ⭐`);
+        }
 
-            if (tg) tg.MainButton.showProgress();
-
-            const orderText = state.cart.map(item => `${item.name} (${item.size})`).join(', ');
-            const total = state.cart.reduce((sum, item) => sum + item.price, 0);
-
-            const data = { name, phone, order: orderText, total };
-
-            try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                tg?.showAlert('Заказ отправлен! Менеджер DEPO свяжется с вами.', () => {
-                    tg?.close();
-                });                tg?.HapticFeedback?.notificationOccurred('success');
-            } catch (err) {
-                tg?.showAlert('Ошибка сети. Проверьте соединение.');
-                tg?.HapticFeedback?.notificationOccurred('error');
-                tg?.MainButton?.hideProgress();
+        function votePost(postId, type) {
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            // Убираем предыдущий голос
+            if (post.userVote === 'up') post.votes.up--;
+            if (post.userVote === 'down') post.votes.down--;
+            
+            // Переключаем или убираем голос
+            if (post.userVote === type) {
+                post.userVote = null;
+            } else {
+                post.userVote = type;
+                post.votes[type === 'up' ? 'up' : 'down']++;
+                
+                // Начисляем рейтинг автору за апвоут
+                if (type === 'up') {
+                    const voteWeight = 0.02 * (0.5 + (currentUser.rating / 5) * 1.5);
+                    const result = calculateRatingChange(post.author.rating, voteWeight, currentUser.rating);
+                    post.author.rating = result.newRating;
+                }
             }
+            
+            currentUser.votes++;
+            saveData();
+            renderPosts();
         }
 
-        // Открытие карты
-        function openMap() {
-            window.open('https://yandex.ru/maps/?pt=82.9183,55.0413&z=16&l=map', '_blank');
+        function getTimeAgo(timestamp) {
+            const seconds = Math.floor((Date.now() - timestamp) / 1000);
+            if (seconds < 60) return 'только что';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} мин`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} ч`;
+            return `${Math.floor(seconds / 86400)} д`;
         }
 
-        // Управление фильтрами
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                state.selectedCategory = btn.dataset.category;
-                renderProducts();
-            });
-        });
-
-        // Поиск
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            state.searchQuery = e.target.value;
-            renderProducts();
-        });
-
-        // XSS защита
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function renderPosts() {
+            const container = document.getElementById('postsContainer');
+            document.getElementById('currentAvatar').textContent = currentUser.avatar;
+            
+            container.innerHTML = posts.map(post => `
+                <article class="post-card">
+                    <div class="post-header">
+                        <div class="post-author">
+                            <div class="author-avatar" style="background: ${post.author.rating > 4.5 ? 'linear-gradient(135deg, #ffd700, #ffed4e)' : ''}">
+                                ${post.author.avatar}
+                            </div>
+                            <div class="author-info">
+                                <h4>
+                                    ${post.author.name}
+                                    ${post.author.verified ? '<span style="color: var(--accent-gold);">✓</span>' : ''}
+                                    <span class="author-rating">★ ${post.author.rating.toFixed(3)}</span>
+                                </h4>
+                                <div class="post-time">${getTimeAgo(post.timestamp)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="post-score">📊 Score: ${post.score}</div>
+                    <div class="post-content">${post.content}</div>
+                    
+                    <div class="post-actions">
+                        <div class="vote-section">
+                            <button class="vote-btn ${post.userVote === 'up' ? 'active-up' : ''}" onclick="votePost(${post.id}, 'up')">▲</button>
+                            <span class="vote-count" style="color: ${post.votes.up > post.votes.down ? 'var(--success)' : post.votes.down > post.votes.up ? 'var(--danger)' : 'var(--text-primary)'}">
+                                ${post.votes.up - post.votes.down}
+                            </span>
+                            <button class="vote-btn ${post.userVote === 'down' ? 'active-down' : ''}" onclick="votePost(${post.id}, 'down')">▼</button>
+                        </div>
+                        <button class="action-btn">💬 ${Math.floor(Math.random() * 15)}</button>
+                        <button class="action-btn">↗️</button>
+                    </div>
+                </article>
+            `).join('');
         }
 
-        // Загрузка
-        loadProducts();
+        // Инициализация
+        renderPosts();
     </script>
 </body>
-</html>
+</html>'''
+
+print("✅ Страница ЛЕНТЫ создана")
+print(f"Размер: {len(feed_html)} символов")
